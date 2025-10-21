@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Натальная карта и астрологический прогноз</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Астрологический прогноз</h1>
+            <p class="subtitle">Узнайте свою натальную карту и получите персональный прогноз</p>
+        </header>
+
+        <main>
+            <form id="birthForm" class="birth-form">
+                <div class="form-group">
+                    <label for="city">Город рождения:</label>
+                    <input type="text" id="city" name="city" placeholder="Начните вводить название города..." autocomplete="off" required>
+                    <div id="cityDropdown" class="dropdown hidden"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date">Дата рождения:</label>
+                        <input type="date" id="date" name="date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="time">Время рождения:</label>
+                        <input type="time" id="time" name="time" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Рассчитать прогноз</button>
+            </form>
+
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Рассчитываем вашу натальную карту...</p>
+            </div>
+
+            <div id="error" class="error hidden"></div>
+        </main>
+
+        <footer>
+            <p>Астрологические расчёты основаны на точных астрономических данных</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

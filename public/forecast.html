@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ваш астрологический прогноз</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Ваш персональный прогноз</h1>
+            <a href="/" class="btn btn-secondary">Рассчитать новый прогноз</a>
+        </header>
+
+        <main>
+            <div id="natalChart" class="natal-chart">
+                <h2>Ваша натальная карта</h2>
+                <div id="chartInfo" class="chart-info"></div>
+            </div>
+
+            <div id="todayForecast" class="forecast-card today">
+                <h2>Прогноз на сегодня</h2>
+                <div id="todayContent" class="forecast-content"></div>
+            </div>
+
+            <div class="cta-section">
+                <h3>Хотите узнать больше?</h3>
+                <p>Получите полный прогноз на целый год с подробным анализом всех планетарных влияний!</p>
+                <button class="btn btn-primary btn-large" id="buyButton">
+                    Купить натальную карту на год
+                </button>
+            </div>
+
+            <div id="additionalForecasts" class="additional-forecasts hidden">
+                <h3>Прогнозы на ближайшие дни (предпросмотр)</h3>
+                <div id="forecastList" class="forecast-list"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Астрологические расчёты основаны на точных астрономических данных</p>
+        </footer>
+    </div>
+
+    <script src="forecast.js"></script>
+</body>
+</html>

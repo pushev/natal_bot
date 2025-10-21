@@ -1,0 +1,20 @@
+{
+  "name": "astrology-natal-chart",
+  "version": "1.0.0",
+  "description": "Астрологический сайт для расчёта натальной карты и прогнозов",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["astrology", "natal chart", "horoscope"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "astronomy-engine": "^2.1.19"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
