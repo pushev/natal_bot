@@ -7,8 +7,7 @@ if (!chartData) {
 } else {
     // Отображаем данные натальной карты и прогноз
     displayNatalChart(chartData);
-    displayTodayForecast(chartData);
-    displayAdditionalForecasts(chartData);
+    displayMonthlyForecast(chartData);
 }
 
 // Отображение натальной карты
@@ -46,46 +45,59 @@ function displayNatalChart(data) {
     });
 }
 
-// Отображение прогноза на сегодня
-function displayTodayForecast(data) {
+// Отображение месячного прогноза
+function displayMonthlyForecast(data) {
     const todayContent = document.getElementById('todayContent');
     const { forecast } = data;
 
-    // Находим прогноз на сегодня
-    const todayForecast = forecast.find(f => f.isToday);
+    if (forecast && forecast.forecast) {
+        // Форматируем период прогноза
+        const startDate = new Date(forecast.startDate);
+        const endDate = new Date(forecast.endDate);
 
-    if (todayForecast) {
+        const periodText = `${startDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })} - ${endDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+        // Преобразуем markdown в HTML
+        const forecastHtml = convertMarkdownToHtml(forecast.forecast);
+
         todayContent.innerHTML = `
-            <div class="forecast-date">${formatDateRu(todayForecast.date)}</div>
-            <div class="forecast-text">${todayForecast.text}</div>
+            <div class="forecast-date">Период: ${periodText}</div>
+            <div class="forecast-text">${forecastHtml}</div>
         `;
     }
 }
 
-// Отображение дополнительных прогнозов (следующие 7 дней как превью)
-function displayAdditionalForecasts(data) {
-    const forecastList = document.getElementById('forecastList');
-    const { forecast } = data;
+// Улучшенный конвертер markdown в HTML
+function convertMarkdownToHtml(markdown) {
+    let html = markdown;
 
-    // Показываем только следующие 7 дней после сегодня
-    const nextDaysForecasts = forecast.slice(1, 8);
+    // Заголовки третьего уровня ### Заголовок
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
 
-    nextDaysForecasts.forEach(f => {
-        const forecastDiv = document.createElement('div');
-        forecastDiv.className = 'forecast-preview';
+    // Заголовки второго уровня ## Заголовок
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
 
-        // Укорачиваем текст для превью
-        const previewText = f.text.split('.')[0] + '...';
+    // Жирный текст **текст**
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-        forecastDiv.innerHTML = `
-            <div class="forecast-preview-date">${formatDateRu(f.date)} (День ${f.day})</div>
-            <div class="forecast-preview-text">${previewText}</div>
-        `;
+    // Разделяем на параграфы по двойным переводам строк
+    const paragraphs = html.split('\n\n');
 
-        forecastList.appendChild(forecastDiv);
-    });
+    html = paragraphs.map(para => {
+        // Если это заголовок, не оборачиваем в <p>
+        if (para.startsWith('<h2>') || para.startsWith('<h3>')) {
+            return para;
+        }
+        // Если параграф пустой, пропускаем
+        if (para.trim() === '') {
+            return '';
+        }
+        // Заменяем одинарные переводы строк на <br>
+        const withBreaks = para.replace(/\n/g, '<br>');
+        return `<p>${withBreaks}</p>`;
+    }).join('\n');
 
-    document.getElementById('additionalForecasts').classList.remove('hidden');
+    return html;
 }
 
 // Форматирование даты
