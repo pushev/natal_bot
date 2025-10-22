@@ -50,7 +50,6 @@ header {
     background: var(--color-bg);
     padding: var(--spacing-2xl) 0 var(--spacing-xl);
     text-align: center;
-    border-bottom: 1px solid var(--color-border);
 }
 
 header h1 {
@@ -258,6 +257,11 @@ input[type="time"]:focus {
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     transition: all 0.2s;
+    min-height: 85px;
+    height: 85px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .planet-info:hover {
@@ -276,7 +280,7 @@ input[type="time"]:focus {
 .planet-position {
     color: var(--color-text-secondary);
     font-size: 0.8125rem;
-    line-height: 1.4;
+    line-height: 1.2;
 }
 
 /* Карточка прогноза */

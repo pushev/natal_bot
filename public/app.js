@@ -61,11 +61,12 @@ document.addEventListener('click', (e) => {
 birthForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const name = document.getElementById('name').value.trim();
     const city = cityInput.value.trim();
     const date = document.getElementById('date').value;
     const time = document.getElementById('time').value;
 
-    if (!city || !date || !time) {
+    if (!name || !city || !date || !time) {
         showError('Пожалуйста, заполните все поля');
         return;
     }
@@ -81,7 +82,7 @@ birthForm.addEventListener('submit', async (e) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ city, date, time })
+            body: JSON.stringify({ name, city, date, time })
         });
 
         if (!response.ok) {

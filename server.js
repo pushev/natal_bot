@@ -37,7 +37,7 @@ app.get('/api/cities', (req, res) => {
 // API для расчёта натальной карты
 app.post('/api/calculate', async (req, res) => {
     try {
-        const { city, date, time } = req.body;
+        const { name, city, date, time } = req.body;
 
         // Найти город в справочнике
         const selectedCity = cities.find(c => c.name === city);
@@ -58,10 +58,11 @@ app.post('/api/calculate', async (req, res) => {
         const houses = calculateHouses(birthDateTime, selectedCity.lat, selectedCity.lon);
 
         // Генерируем прогноз на 30 дней (асинхронно через GPT)
-        const forecast = await generateForecast(birthDateTime, planets, zodiacSigns);
+        const forecast = await generateForecast(name, birthDateTime, planets, zodiacSigns);
 
         // Сохраняем данные для последующего использования
         const chartData = {
+            name,
             city: selectedCity,
             birthDate: birthDateTime,
             planets,
@@ -227,7 +228,7 @@ function getSiderealTime(date, lon) {
 }
 
 // Функция генерации прогноза
-async function generateForecast(birthDate, planets, zodiacSigns) {
+async function generateForecast(name, birthDate, planets, zodiacSigns) {
     const now = new Date();
     const endDate = new Date(now);
     endDate.setDate(now.getDate() + 30);
@@ -242,6 +243,7 @@ async function generateForecast(birthDate, planets, zodiacSigns) {
 
     // Генерируем детальный прогноз на месяц через GPT
     const monthlyForecast = await generateMonthlyForecastWithGPT(
+        name,
         birthDate,
         planets,
         zodiacSigns,
@@ -258,8 +260,8 @@ async function generateForecast(birthDate, planets, zodiacSigns) {
     };
 }
 
-// Генерация детального месячного прогноза через GPT-4o-mini
-async function generateMonthlyForecastWithGPT(birthDate, natalPlanets, zodiacSigns, currentTransits, midTransits, startDate, endDate) {
+// Генерация детального месячного прогноза через GPT-4o
+async function generateMonthlyForecastWithGPT(name, birthDate, natalPlanets, zodiacSigns, currentTransits, midTransits, startDate, endDate) {
     // Если нет API ключа, используем старую функцию
     if (!process.env.OPENAI_API_KEY) {
         console.log('OpenAI API ключ не найден, используем статические прогнозы');
@@ -282,68 +284,41 @@ async function generateMonthlyForecastWithGPT(birthDate, natalPlanets, zodiacSig
 
         const currentTransitsData = {
             sunSign: getZodiacSign(currentTransits.sun.longitude).sign,
+            sunDegree: getZodiacSign(currentTransits.sun.longitude).degree,
             moonSign: getZodiacSign(currentTransits.moon.longitude).sign,
             mercurySign: getZodiacSign(currentTransits.mercury.longitude).sign,
             venusSign: getZodiacSign(currentTransits.venus.longitude).sign,
-            marsSign: getZodiacSign(currentTransits.mars.longitude).sign
+            marsSign: getZodiacSign(currentTransits.mars.longitude).sign,
+            jupiterSign: getZodiacSign(currentTransits.jupiter.longitude).sign,
+            saturnSign: getZodiacSign(currentTransits.saturn.longitude).sign
         };
 
-        const midTransitsData = {
-            sunSign: getZodiacSign(midTransits.sun.longitude).sign
-        };
-
+        // Рассчитываем основной аспект
         const sunAspect = calculateAspect(currentTransits.sun.longitude, natalPlanets.sun.longitude);
 
         // Промпт для GPT
-        const prompt = `Ты профессиональный астролог. Создай детальный персональный астрологический прогноз на месяц (с ${startDate.toLocaleDateString('ru-RU')} по ${endDate.toLocaleDateString('ru-RU')}).
+        const prompt = `Персональный астрологический прогноз для ${name} на период ${startDate.toLocaleDateString('ru-RU')} - ${endDate.toLocaleDateString('ru-RU')}.
 
-НАТАЛЬНАЯ КАРТА:
-- Солнце: ${natalData.sunSign} ${natalData.sunDegree}°
-- Луна: ${natalData.moonSign} ${natalData.moonDegree}°
-- Меркурий: ${natalData.mercurySign}
-- Венера: ${natalData.venusSign}
-- Марс: ${natalData.marsSign}
-- Юпитер: ${natalData.jupiterSign}
-- Сатурн: ${natalData.saturnSign}
+Натальная карта: Солнце ${natalData.sunSign} ${natalData.sunDegree}°, Луна ${natalData.moonSign}, Меркурий ${natalData.mercurySign}, Венера ${natalData.venusSign}, Марс ${natalData.marsSign}, Юпитер ${natalData.jupiterSign}, Сатурн ${natalData.saturnSign}.
 
-ТЕКУЩИЕ ТРАНЗИТЫ:
-- Солнце: ${currentTransitsData.sunSign}
-- Луна: ${currentTransitsData.moonSign}
-- Меркурий: ${currentTransitsData.mercurySign}
-- Венера: ${currentTransitsData.venusSign}
-- Марс: ${currentTransitsData.marsSign}
+Транзиты: Солнце ${currentTransitsData.sunSign}, Луна ${currentTransitsData.moonSign}, Меркурий ${currentTransitsData.mercurySign}, Венера ${currentTransitsData.venusSign}, Марс ${currentTransitsData.marsSign}, Юпитер ${currentTransitsData.jupiterSign}, Сатурн ${currentTransitsData.saturnSign}.
 
-АСПЕКТЫ:
-- Транзитное Солнце к натальному: ${Math.round(sunAspect)}°
-
-ТРЕБОВАНИЯ К ПРОГНОЗУ:
-1. Напиши развёрнутый прогноз на 600-800 слов
-2. Структура:
-   - Введение с анализом натальной карты
-   - Основные планетарные влияния месяца (используй эмодзи: 🌞 🌙 💬 💕 ⚡)
-   - Персональные аспекты и их влияние
-   - Практические рекомендации по сферам: карьера, отношения, здоровье, финансы
-   - Благоприятные и сложные периоды месяца
-3. Стиль: профессиональный, но доступный, позитивный и мотивирующий
-4. Используй markdown для форматирования: **жирный** для заголовков
-5. Закончи фразой о свободе воли
-
-Создай уникальный, глубокий и практичный прогноз.`;
+Начни "${name}, ваш астрологический прогноз готов!" и включи: введение, планетарные влияния с эмодзи, 5 сфер жизни (💼💰❤️🏥🌟), важные даты, намек на полный годовой прогноз, заключение о свободе воли. Используй термины: транзит, аспект, квадрат, тригон. Markdown.`;
 
         const completion = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: "gpt-4o",
             messages: [
                 {
                     role: "system",
-                    content: "Ты профессиональный астролог с 20-летним опытом. Твои прогнозы точные, практичные и мотивирующие. Ты пишешь красивым литературным языком на русском."
+                    content: "Ты опытный астролог. Пишешь детальные персональные прогнозы на русском языке."
                 },
                 {
                     role: "user",
                     content: prompt
                 }
             ],
-            temperature: 0.8,
-            max_tokens: 2000
+            temperature: 0.7,
+            max_tokens: 2500
         });
 
         return completion.choices[0].message.content;

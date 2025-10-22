@@ -37,3 +37,6 @@ build/
 
 # Optional eslint cache
 .eslintcache
+
+# Test forecasts
+examples/generated_forecasts/
